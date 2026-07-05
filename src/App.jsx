@@ -14,9 +14,9 @@ import Careers from './components/Careers.jsx';
 import Media from './components/Media.jsx';
 import Services from './components/Services.jsx';
 
-const BACKEND_AUTH_URL = "http://localhost:5001/api/auth";
-const BACKEND_DOC_URL = "http://localhost:5001/api/document";
-const BACKEND_CHAT_URL = "http://localhost:5001/api/document/chat";
+const BACKEND_AUTH_URL = "https://pdf-ai-assistant-int4.onrender.com/api/auth";
+const BACKEND_DOC_URL = "https://pdf-ai-assistant-int4.onrender.com/api/document";
+const BACKEND_CHAT_URL = "https://pdf-ai-assistant-int4.onrender.com/api/document/chat";
 
 const WHATSAPP_LINK = "https://wa.me/919999999999";
 const INSTAGRAM_LINK = "https://instagram.com/_avaneeshkumar";
