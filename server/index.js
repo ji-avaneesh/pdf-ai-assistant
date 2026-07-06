@@ -18,7 +18,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// Routes Linking
+// Routes Linking 
 app.use('/api/auth', authRoutes);
 app.use('/api/document', documentRoutes); // यह मुख्य रूट है, इसके अंदर अब /chat एक्टिव है
 
