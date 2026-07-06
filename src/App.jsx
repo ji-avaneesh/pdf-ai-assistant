@@ -9,7 +9,7 @@ import Services from './components/Services.jsx';
 import LandingPage from './components/LandingPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import ChatBox from './components/ChatBox.jsx';
-import Toolkit from './components/Toolkit.jsx';
+import Toolkit from './components/toolkit.jsx';
 import AuthModal from './components/AuthModal.jsx';
 
 const BACKEND_AUTH_URL = "https://pdf-ai-assistant-int4.onrender.com/api/auth";
