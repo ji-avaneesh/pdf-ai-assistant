@@ -1,58 +1,95 @@
 import React from 'react';
-import { Upload, Clock, FileText, CheckCircle } from 'lucide-react';
+import { Plus, FileText, ChevronRight, Sparkles } from 'lucide-react';
 
 export default function Sidebar({ isUploading, handleFileUpload, uploadHistory, selectedDocId, setSelectedDocId }) {
+
+  const formatSize = (size) => {
+    if (!size) return "0 KB";
+    if (typeof size === 'string') return size;
+    return `${(size / 1024).toFixed(2)} KB`;
+  };
+
   return (
-    <div className="w-80 flex flex-col gap-4 shrink-0 h-full">
-      <div className="bg-slate-800/50 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4 shrink-0">
-        <h3 className="font-semibold text-slate-200 flex items-center gap-2 text-sm tracking-wider uppercase">
-          <Upload className="w-4 h-4 text-indigo-400" /> Upload Center
-        </h3>
-        <label className={`border-2 border-dashed ${isUploading ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-700 hover:border-indigo-500 bg-slate-900/50 hover:bg-indigo-500/5'} rounded-xl p-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all duration-200 group`}>
-          <input type="file" accept="application/pdf" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
-          <div className="p-2.5 rounded-xl bg-slate-800 group-hover:bg-indigo-600 transition-all">
-            <Upload className="w-5 h-5 text-slate-400 group-hover:text-white" />
+    <div className="w-68 bg-[#070b13] border-r border-slate-800/60 flex flex-col h-full font-sans select-none text-slate-200 shrink-0">
+
+      {/* ➕ New Document Button */}
+      <div className="p-3.5 shrink-0">
+        <label className="w-full h-11 border border-slate-800 hover:border-indigo-500/50 bg-[#0b1324] hover:bg-indigo-500/5 rounded-xl px-4 flex items-center justify-between transition-all duration-200 cursor-pointer group shadow-sm">
+          <input type="file" accept=".pdf" onChange={handleFileUpload} className="hidden" disabled={isUploading} />
+          <div className="flex items-center gap-2.5">
+            <Plus className="w-4 h-4 text-indigo-400 group-hover:rotate-90 transition-transform" />
+            <span className="text-xs font-bold tracking-wide group-hover:text-white transition-colors">
+              {isUploading ? "Vectorizing..." : "New Document"}
+            </span>
           </div>
-          <div className="text-center">
-            <p className="text-sm font-medium text-slate-300">{isUploading ? 'Processing...' : 'Choose PDF File'}</p>
-            <p className="text-xs text-slate-500 mt-1">Max capacity 50MB</p>
-          </div>
+          <span className="text-[9px] bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-500 font-mono font-bold">PDF</span>
         </label>
       </div>
 
-      <div className="flex-1 bg-slate-800/50 border border-slate-800 rounded-2xl p-5 flex flex-col min-h-0">
-        <h3 className="font-semibold text-slate-200 flex items-center gap-2 text-sm tracking-wider uppercase mb-3">
-          <Clock className="w-4 h-4 text-emerald-400" /> Cloud Vault
-        </h3>
-        <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 min-h-0">
-          {uploadHistory.length === 0 ? (
-            <div className="h-32 flex flex-col items-center justify-center text-center p-4 rounded-xl border border-slate-800 bg-slate-900/30">
-              <FileText className="w-8 h-8 text-slate-700 mb-2" />
-              <p className="text-xs text-slate-500 font-medium">No documents indexed yet.</p>
-            </div>
-          ) : (
-            uploadHistory.map((doc) => (
+      {/* 🗄️ Core Scrollable Vault */}
+      <div className="flex-1 overflow-y-auto px-2.5 py-1 space-y-1 scrollbar-thin scrollbar-thumb-slate-900">
+        <div className="px-2 py-2 text-[10px] font-mono font-bold text-slate-600 uppercase tracking-widest flex items-center justify-between">
+          <span>Active Context Vault</span>
+          <span className="bg-slate-950 px-1.5 py-0.5 rounded border border-slate-900 text-slate-500">{uploadHistory.length}</span>
+        </div>
+
+        {uploadHistory.length === 0 ? (
+          <div className="h-28 flex flex-col items-center justify-center text-slate-600 gap-1 text-center px-4">
+            <p className="text-xs font-semibold">Workspace Empty</p>
+            <p className="text-[10px] text-slate-700">Initialize your first cluster node.</p>
+          </div>
+        ) : (
+          uploadHistory.map((doc) => {
+            const docId = doc.id || doc._id;
+            const isSelected = docId === selectedDocId;
+
+            return (
               <div
-                key={doc.id || doc._id}
-                onClick={() => setSelectedDocId(doc.id || doc._id)}
-                className={`p-3.5 rounded-xl border transition-all duration-200 cursor-pointer flex items-start gap-3 relative overflow-hidden group ${
-                  selectedDocId === (doc.id || doc._id) ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/80'
-                }`}
+                key={docId}
+                onClick={() => setSelectedDocId(docId)}
+                className={`group relative px-3 py-3 rounded-xl flex items-center gap-3 cursor-pointer transition-all duration-150 select-none border
+                  ${isSelected
+                    ? 'bg-slate-900/80 border-slate-800 text-slate-100 shadow-md'
+                    : 'bg-transparent border-transparent hover:bg-slate-950/30 text-slate-400 hover:text-slate-200'
+                  }`}
               >
-                <FileText className={`w-5 h-5 mt-0.5 shrink-0 ${selectedDocId === (doc.id || doc._id) ? 'text-indigo-400' : 'text-slate-400'}`} />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-200 truncate pr-4">{doc.fileName}</p>
-                  <div className="flex items-center gap-2 mt-1.5 text-xs text-slate-500">
-                    <span>{doc.fileSize}</span>
-                    <span>•</span>
-                    <span className="text-emerald-500/90 font-medium flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Ready</span>
-                  </div>
+                {isSelected && (
+                  <div className="absolute left-0 top-2.5 bottom-2.5 w-0.5 bg-indigo-500 rounded-r-sm"></div>
+                )}
+
+                <FileText className={`w-4 h-4 shrink-0 transition-colors ${isSelected ? 'text-indigo-400' : 'text-slate-500'}`} />
+
+                <div className="overflow-hidden flex-1 min-w-0">
+                  <p className="text-xs font-bold truncate leading-none">
+                    {doc.fileName}
+                  </p>
+                  <p className="text-[9px] text-slate-600 mt-1.5 font-mono">
+                    {formatSize(doc.fileSize)}
+                  </p>
+                </div>
+
+                <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
                 </div>
               </div>
-            ))
-          )}
+            );
+          })
+        )}
+      </div>
+
+      {/* ⚙️ Status Section */}
+      <div className="p-3.5 border-t border-slate-900 bg-[#070b13] shrink-0">
+        <div className="bg-[#0b1324] border border-slate-800/40 rounded-xl p-3 flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-indigo-600/10 border border-indigo-500/20 rounded-lg flex items-center justify-center text-indigo-400 shrink-0">
+            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-[9px] font-mono font-bold text-indigo-400 tracking-wider">WORKSPACE STATUS</p>
+            <p className="text-xs font-bold text-slate-400 truncate">V2_Engine_Active</p>
+          </div>
         </div>
       </div>
+
     </div>
   );
 }

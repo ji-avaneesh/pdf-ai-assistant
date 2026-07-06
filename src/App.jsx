@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { FileText, X } from 'lucide-react';
 
-// 🛠️ बिल्कुल सटीक पाथ्स (अब Toolkit.jsx भी इसमें जुड़ गया है)
+// 🛠️ बिल्कुल सटीक पाथ्स
 import AboutUs from './components/AboutUs.jsx';
 import Careers from './components/Careers.jsx';
 import Media from './components/Media.jsx';
@@ -10,7 +9,8 @@ import Services from './components/Services.jsx';
 import LandingPage from './components/LandingPage.jsx';
 import Sidebar from './components/Sidebar.jsx';
 import ChatBox from './components/ChatBox.jsx';
-import Toolkit from './components/Toolkit.jsx'; // <-- नया इम्पोर्ट
+import Toolkit from './components/Toolkit.jsx';
+import AuthModal from './components/AuthModal.jsx';
 
 const BACKEND_AUTH_URL = "https://pdf-ai-assistant-int4.onrender.com/api/auth";
 const BACKEND_DOC_URL = "https://pdf-ai-assistant-int4.onrender.com/api/document";
@@ -22,10 +22,19 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isSignupMode, setIsSignupMode] = useState(false);
+  const [phoneMode, setPhoneMode] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // 🔔 इन-ऐप टोस्ट पॉप-अप स्टेट
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 4000);
+  };
 
   const [uploadHistory, setUploadHistory] = useState([]);
   const [selectedDocId, setSelectedDocId] = useState(null);
@@ -66,7 +75,7 @@ export default function App() {
       const res = await axios.post(`${BACKEND_DOC_URL}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      alert(`🎉 ${res.data.message}`);
+      showToast(`🎉 ${res.data.message || "Document vectorized successfully!"}`);
 
       const docId = res.data.document.id || res.data.document._id;
       const newDoc = {
@@ -78,25 +87,29 @@ export default function App() {
       setUploadHistory(prev => [newDoc, ...prev]);
       setSelectedDocId(docId);
     } catch (err) {
-      alert(err.response?.data?.message || "PDF Upload Failed!");
+      showToast(err.response?.data?.message || "PDF Upload Failed!", "error");
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleSignup = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    setIsUploading(true);
     try {
       const res = await axios.post(`${BACKEND_AUTH_URL}/signup`, { name, email, password });
-      alert(res.data.message);
+      showToast(res.data.message || "Account created successfully!");
       setIsSignupMode(false);
     } catch (err) {
-      alert(err.response?.data?.message || "Signup Failed!");
+      showToast(err.response?.data?.message || "Signup Failed!", "error");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    setIsUploading(true);
     try {
       const res = await axios.post(`${BACKEND_AUTH_URL}/login`, { email, password });
       localStorage.setItem("token", res.data.token);
@@ -104,9 +117,12 @@ export default function App() {
       setIsLoggedIn(true);
       setShowAuthModal(false);
       setCurrentView('landing');
+      showToast("🚀 Gateway secured. Session authorized!");
       fetchUserHistory(res.data.user.id || res.data.user._id);
     } catch (err) {
-      alert(err.response?.data?.message || "Login Failed!");
+      showToast(err.response?.data?.message || "Invalid credentials standard!", "error");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -117,6 +133,7 @@ export default function App() {
     setUploadHistory([]);
     setSelectedDocId(null);
     setCurrentView('landing');
+    showToast("Session purged. Disconnected from node.");
     setChat([{ role: 'ai', text: 'Hello! Upload a PDF or select an existing one from your dashboard, and ask me anything.' }]);
   };
 
@@ -136,25 +153,52 @@ export default function App() {
         documentId: selectedDocId,
         question: currentQuestion
       });
-      setChat(prev => [...prev, { role: 'ai', text: res.data.answer }]);
+      const aiResponse = res.data.answer || res.data.reply || res.data.text || res.data.message || (typeof res.data === 'string' ? res.data : "I have processed your request.");
+      setChat(prev => [...prev, { role: 'ai', text: aiResponse }]);
     } catch (err) {
-      setChat(prev => [...prev, { role: 'ai', text: "Failed to get response from AI server. Please verify your Gemini API key." }]);
+      console.error("AI Server Fetch Error:", err);
+      setChat(prev => [...prev, {
+        role: 'ai',
+        text: "Neural server connection timeout."
+      }]);
     } finally {
       setIsTyping(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-900 text-slate-100 font-sans flex flex-col overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+    /* 🛠️ फिक्स्ड: जब यूज़र लॉगिन होगा तभी h-screen और overflow-hidden लगेगा, वरना बिना लॉगिन के पूरा पेज नॉर्मल स्क्रोल होगा */
+    <div className={`w-full bg-slate-900 text-slate-100 font-sans flex flex-col selection:bg-indigo-500 selection:text-white relative
+      ${isLoggedIn ? 'h-screen overflow-hidden' : 'min-h-screen overflow-x-hidden'}`}
+    >
+
+      {/* 🔔 एनिमेटेड टोस्ट पॉप-अप यूआई */}
+      {toast.show && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] px-5 py-3.5 rounded-xl border font-sans text-xs font-bold tracking-wide shadow-2xl flex items-center gap-3 backdrop-blur-md animate-slideDown"
+          style={{
+            backgroundColor: toast.type === "error" ? "rgba(244, 63, 94, 0.12)" : "rgba(16, 185, 129, 0.12)",
+            borderColor: toast.type === "error" ? "rgba(244, 63, 94, 0.4)" : "rgba(16, 185, 129, 0.4)",
+            color: toast.type === "error" ? "#fda4af" : "#a7f3d0"
+          }}
+        >
+          <span>{toast.type === "error" ? "⚠️" : "⚡"}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideDown { 0% { transform: translate3d(-50%, -40px, 0); opacity: 0; } 100% { transform: translate3d(-50%, 0, 0); opacity: 1; } }
+        .animate-slideDown { animation: slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+      `}</style>
 
       {/* Navbar Section */}
       <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40 shrink-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setCurrentView('landing')}>
-            <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-600/20">
-              <FileText className="w-6 h-6" />
+          <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => setCurrentView('landing')}>
+            <div className="w-8 h-8 bg-slate-950 border border-slate-800/80 rounded-lg overflow-hidden p-0.5 shadow-md group-hover:border-indigo-500/40 transition-all duration-300">
+              <img src="/footer-logo.png" alt="Logo" className="w-full h-full object-cover rounded-md pointer-events-none" />
             </div>
-            <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
               PDF AI <span className="text-indigo-500 font-medium">Assistant</span>
             </span>
           </div>
@@ -171,23 +215,20 @@ export default function App() {
             {isLoggedIn ? (
               <div className="flex items-center gap-4">
                 <span className="text-sm text-slate-400 font-medium">👋 {user?.name}</span>
-                <button onClick={handleLogout} className="px-4 py-2 text-sm font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 transition-all duration-200">
-                  Logout
-                </button>
+                <button onClick={handleLogout} className="px-4 py-2 text-sm font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl hover:bg-rose-500 transition-all duration-200">Logout</button>
               </div>
             ) : (
-              <button onClick={() => { setIsSignupMode(false); setShowAuthModal(true); }} className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all">
-                Sign in
-              </button>
+              <button onClick={() => { setIsSignupMode(false); setShowAuthModal(true); }} className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all">Sign in</button>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Main Framework Content Routing */}
-      <main className="flex-1 flex flex-col relative w-full">
+      {/* 🚀 Main Content Router */}
+      {/* 🛠️ फिक्स्ड: यहाँ भी हाइट कंडीशन केवल isLoggedIn पर ही एक्टिवेट होगी */}
+      <main className={`flex-1 flex flex-col relative w-full ${isLoggedIn ? 'h-[calc(100vh-4rem)] overflow-hidden' : ''}`}>
         {isLoggedIn ? (
-          <div className="flex-1 flex w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 gap-6 h-[calc(100vh-4rem)] overflow-hidden">
+          <div className="flex-1 flex w-full h-full overflow-hidden bg-[#070b13]">
             <Sidebar
               isUploading={isUploading}
               handleFileUpload={handleFileUpload}
@@ -214,7 +255,7 @@ export default function App() {
           <Media setCurrentView={setCurrentView} />
         ) : currentView === 'services' ? (
           <Services setCurrentView={setCurrentView} />
-        ) : currentView === 'toolkit' ? ( // 🛠️ फिक्स्ड टूलकिट रूट रास्ता खोल दिया है!
+        ) : currentView === 'toolkit' ? (
           <Toolkit setCurrentView={setCurrentView} />
         ) : (
           <LandingPage
@@ -225,34 +266,29 @@ export default function App() {
         )}
       </main>
 
-      {/* Auth Form Overlay Modal */}
-      {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-2xl p-6 relative">
-            <button onClick={() => setShowAuthModal(false)} className="absolute top-4 right-4 text-slate-500 hover:text-slate-300"><X className="w-5 h-5" /></button>
-            <h2 className="text-2xl font-bold mb-1.5 text-slate-100">{isSignupMode ? 'Create an Account' : 'Welcome Back'}</h2>
-            <form onSubmit={isSignupMode ? handleSignup : handleLogin} className="space-y-4">
-              {isSignupMode && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Name</label>
-                  <input type="text" required value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500" />
-                </div>
-              )}
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@domain.com" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Password</label>
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500" />
-              </div>
-              <button type="submit" className="w-full py-3.5 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 mt-2 transition-colors">
-                {isSignupMode ? 'Sign Up' : 'Log In'}
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* 🔐 क्लीन प्रो ऑथेंटिकेशन सब-कॉम्पोनेंट */}
+      <AuthModal
+        showAuthModal={showAuthModal}
+        setShowAuthModal={setShowAuthModal}
+        isSignupMode={isSignupMode}
+        setIsSignupMode={setIsSignupMode}
+        phoneMode={phoneMode}
+        setPhoneMode={setPhoneMode}
+        name={name}
+        setName={setName}
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        handleSignup={handleSignup}
+        handleLogin={handleLogin}
+        isUploading={isUploading}
+        showToast={showToast}
+        setIsLoggedIn={setIsLoggedIn}
+        setUser={setUser}
+        fetchUserHistory={fetchUserHistory}
+        BACKEND_AUTH_URL={BACKEND_AUTH_URL}
+      />
     </div>
   );
 }
