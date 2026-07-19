@@ -36,7 +36,7 @@ export default function Services({ setCurrentView }) {
     { title: "Research Grade Accuracy", desc: "Fact-locked context pipeline guarantees clean, citation-supported responses without hallucinations.", icon: <CheckCircle className="w-5 h-5 text-emerald-400" /> },
     { title: "Enterprise Security", desc: "Isolated environment partitions. Strict data lifecycles with automatic 15-day TTL sweeps.", icon: <Shield className="w-5 h-5 text-indigo-400" /> },
     { title: "Lightning Fast", desc: "Asynchronous Node.js indexing and parallel embedding sweeps return results in under 2 seconds.", icon: <Zap className="w-5 h-5 text-amber-400" /> },
-    { title: "Scalable Infrastructure", desc: "Render container infrastructure built to scale seamlessly for large corporate workloads.", icon: <Server className="w-5 h-5 text-cyan-400" /> }
+    { title: "Scalable Infrastructure", desc: "Multi-region cloud node deployment engineered to scale dynamically for heavy enterprise workloads.", icon: <Server className="w-5 h-5 text-cyan-400" /> }
   ];
 
   const platforms = ["React", "Next.js", "Node.js", "OpenAI", "LangChain", "Pinecone", "Vercel", "AWS"];
@@ -214,7 +214,7 @@ export default function Services({ setCurrentView }) {
             ======================================================== */}
         <section className="text-center space-y-6 max-w-3xl mx-auto">
           <span className="text-[9px] font-mono font-bold text-slate-650 uppercase tracking-widest">
-            ENGINE BACKPLANE LOGICAL MATRIX
+            POWERED BY MODERN ENTERPRISE TECH
           </span>
           <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-4 select-none">
             {platforms.map((plat, idx) => (
@@ -250,7 +250,7 @@ export default function Services({ setCurrentView }) {
                 Get Started Free
               </button>
               <button 
-                onClick={() => setCurrentView('landing')}
+                onClick={() => window.location.href = "mailto:jiavaneesh399@gmail.com?subject=Contact Sales - PDF AI Assistant&body=Hi Avaneesh, I am interested in PDF AI Assistant for enterprise workflows. Please contact me with more information."}
                 className="px-6 py-4 rounded-xl text-xs font-extrabold text-slate-400 hover:text-white bg-transparent border border-slate-800 hover:border-slate-700 transition-all duration-300"
               >
                 Contact Sales
