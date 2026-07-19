@@ -1,16 +1,85 @@
-# React + Vite
+# 📄 PDF AI Assistant — Ultra Advanced Vector Core Matrix
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+![Production Status](https://img.shields.io/badge/Production-Live-emerald?style=for-the-badge)
+![Build Status](https://img.shields.io/badge/Vercel%20Build-Passing-brightgreen?style=for-the-badge)
+![Backend Status](https://img.shields.io/badge/Render%20Server-Online-blue?style=for-the-badge)
+![Tech Stack](https://img.shields.io/badge/MERN-Stack-indigo?style=for-the-badge)
 
-Currently, two official plugins are available:
+## 🌌 प्रोजेक्ट का उद्देश्य और विज़न (Project Purpose & Vision)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+आज के समय में जब यूज़र्स के पास लंबे-लंबे डॉक्यूमेंट्स, मैन्युस्क्रिप्ट्स, लीगल कॉन्ट्रैक्ट्स या 10 पन्नों के टेक्निकल रिज्यूमे पढ़ने का समय नहीं होता, तब यह **PDF AI Assistant** काम आता है। इस प्लेटफॉर्म का मुख्य उद्देश्य है **"Complex PDFs को 10X बेहतर और तेज़ तरीके से समझना"**।
 
-## React Compiler
+यह कोई साधारण या डमी टेक्स्ट दिखाने वाली वेबसाइट नहीं है। यह एक **Production-Grade SaaS प्लेटफ़ॉर्म** है, जो यूज़र द्वारा अपलोड की गई किसी भी असली पीडीएफ के टेक्स्ट को लाइव खंगालता है, उसका पूरा विश्लेषण (Contextual Mining) करता है, और यूज़र के सामने बिल्कुल ChatGPT-स्टाइल में कड़क, रिस्पॉन्सिव और स्कैनेबल की-पॉइंट्स लाकर रख देता है।
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 🛠️ यह प्रोजेक्ट किन समस्याओं को हल करता है?
+1. **वॉल ऑफ टेक्स्ट से मुक्ति:** यूज़र को पूरा डॉक्यूमेंट खुद पढ़ने की ज़रूरत नहीं है; एआई खुद स्किल्स, प्रोजेक्ट्स और कोर मैट्रिक्स निकाल लेता है।
+2. **कैश और स्पीड का सही तालमेल:** सर्वर पर बिना किसी फालतू लैग के फाइल पार्स होती है और क्लाउड वॉल्ट में स्टोर हो जाती है।
+3. **स्पेलिंग मिस्टेक की समझ:** अगर कोई यूज़र `summary` की जगह गलती से `summery` या `Brief` की जगह `Bref` लिख देता है, तो एआई यूज़र को एरर देने के बजाय उसकी भावना और इरादे (Intent) को समझकर सही जवाब देता है।
+4. **भाषा की कोई सीमा नहीं:** यूज़र चाहे शुद्ध हिंदी में पूछे, इंग्लिश में पूछे या मिक्स हिंग्लिश (Hinglish) में—यह पार्सर तीनों भाषाओं को लाइव डिटेक्ट करके उसी टोन में रिस्पॉन्स जनरेट करता है।
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 🛠️ संपूर्ण तकनीकी स्टैक (Comprehensive Tech Stack)
+
+इस प्रोजेक्ट को पूरी तरह से मॉड्यूलर, स्केलेबल और हाई-परफॉर्मेंस बनाने के लिए आधुनिक **MERN Stack** का इस्तेमाल किया गया है:
+
+### 1. क्लाइंट-साइड (Front-end Architecture)
+*   **React.js (Vite Engine):** सुपर-फ़ास्ट कंपाइलेशन, हॉट मॉड्यूल रिप्लेसमेंट (HMR) और कड़क प्रोडक्शन बिल्ड के लिए।
+*   **Tailwind CSS:** पूरी वेबसाइट को प्रीमियम डार्क थीम (`bg-[#0b1324]`) और न्यूप्रोफेशनल लुक देने के लिए।
+*   **Lucide React:** क्लीन, स्केलेबल और मॉडर्न वैक्टर आइकन्स (Bot, Cpu, Sparkles, MessageSquare) के लिए।
+*   **Axios:** बैकएंड REST APIs के साथ बिना किसी रुकावट के एसिंक्रोनस (Async/Await) डेटा कम्यूनिकेशन के लिए।
+
+### 2. सर्वर-साइड (Back-end Architecture)
+*   **Node.js & Express.js:** एक मजबूत, इवेंट-ड्रिवेन और नॉन-ब्लॉकिंग आई/ओ (I/O) आर्किटेक्चर वाला REST API सर्वर।
+*   **pdf-parse:** बिना किसी थर्ड-पार्टी पेड क्रेडेंशियल के, बफ़र मेमोरी से सीधे पीडीएफ फाइलों का रॉ टेक्स्ट डेटा एक्सट्रैक्ट करने के लिए।
+*   **Multer:** यूज़र द्वारा भेजी गई मल्टीपार्ट/फॉर्म-डेटा (PDF Files) को बैकएंड मेमोरी स्टोरेज में सुरक्षित हैंडल करने के लिए।
+
+### 3. डेटाबेस और क्लाउड इंफ्रास्ट्रक्चर
+*   **MongoDB & Mongoose:** यूज़र्स के डॉक्यूमेंट्स का स्कीमा, फ़ाइल मेटाडेटा (Name, Size) और एक्सट्रैक्टेड टेक्स्ट कंटेंट को सिंक रखने के लिए।
+*   **JSON Web Tokens (JWT) & Bcrypt:** सिक्योर ऑथेंटिकेशन गेटवे और पासवर्ड हैशिंग के लिए।
+
+---
+
+## 🎨 यूआई/यूएक्स डिसीजन्स और यूज़र इंटरफेस (UI/UX Engineering)
+
+वेबसाइट के इंटरफेस को इस तरह डिज़ाइन किया गया है कि यूज़र को एक प्रीमियम AI SaaS टूल का अहसास हो:
+*   **Fixed Height Lock Layer:** पूरा चैट बॉक्स हमेशा डिस्प्ले साइज पर लॉक रहता है (`h-screen overflow-hidden`) ताकि केवल मैसेजेस वाला एरिया स्क्रोल हो, पूरा पेज ऊपर-नीचे न भागे।
+*   **Whitespace Pre-Wrap Capability:** चैट रिस्पॉन्स के अंदर `whitespace-pre-wrap` यूटिलिटी का उपयोग किया गया है, ताकि एआई द्वारा भेजे गए बुलेट पॉइंट्स और पैराग्राफ्स बिना किसी मिक्सिंग के एकदम क्लीन और अलग-अलग लाइनों में रेंडर हों।
+*   **Custom Thin Scrollbar:** डिफ़ॉल्ट मोटे स्क्रोलबार को हटाकर एक कस्टम इंडिगो-थीम थिन स्क्रोलबार इंजेक्ट किया गया है।
+*   **Interactive Empty State:** जब तक कोई फाइल सिलेक्ट नहीं होती, यूज़र को 4 डायनामिक सजेशन नोड्स दिखाई देते हैं जिन पर क्लिक करके वह सीधे कमांड्स दे सकता है।
+
+---
+
+## 🗂️ प्रोजेक्ट का पूरा फ़ोल्डर स्ट्रक्चर (Directory Tree)
+
+```text
+pdf-ai-assistant/
+├── public/                  # स्टैटिक एसेट्स और लोगो फाइल्स
+│   └── footer-logo.png
+├── server/                  # बैकएंड एक्सप्रेस सर्वर कोड
+│   ├── config/              # डेटाबेस कनेक्शन कॉन्फ़िगरेशन
+│   ├── models/              # मोंगूज डेटाबेस स्कीमा (Document.js, User.js)
+│   ├── routes/              # एपीआई एंडपॉइंट्स (auth.js, document.js)
+│   ├── .env                 # बैकएंड एनवायरनमेंट वेरिएबल्स (Git से प्रोटेक्टेड)
+│   ├── package.json         # बैकएंड डिपेंडेंसीज और स्क्रिप्ट्स
+│   └── server.js            # एक्सप्रेस ऐप का मुख्य एंट्री पॉइंट
+├── src/                     # फ्रंटएंड रिएक्ट कोड (Vite)
+│   ├── assets/              # लोकल इमेजेस और स्टाइल्स
+│   ├── components/          # रीयूजेबल यूआई कंपोनेंट्स
+│   │   ├── AboutUs.jsx      # कंपनी इन्फो
+│   │   ├── AuthModal.jsx    # लॉगिन/साइनअप सिक्योर गेटवे
+│   │   ├── Careers.jsx      # करियर और जॉब नोड्स
+│   │   ├── ChatBox.jsx      # असली चैट स्ट्रीम इंटरफेस
+│   │   ├── LandingPage.jsx  # मुख्य होम लैंडिंग पेज
+│   │   ├── Media.jsx        # मीडिया/अनाउंसमेंट सेक्शन
+│   │   ├── Services.jsx     # सर्विस फीचर्स
+│   │   ├── Sidebar.jsx      # क्लाउड वॉल्ट डॉक्यूमेंट्स लिस्ट
+│   │   └── Toolkit.jsx      # एडवांस एआई टूल्स नोड
+│   ├── App.css              # ग्लोबल सीएसएस ओवरराइड्स
+│   ├── App.jsx              # कोर व्यू राउटर और स्टेट मैनेजर मास्टर फाइल
+│   ├── index.css            # टेलविंड डायरेक्टिव्स और कोर फोंट्स
+│   └── main.jsx             # रिएक्ट रेंडर रूट एंट्री
+├── index.html               # मुख्य एचटीएमएल टेम्पलेट Entry
+├── package.json             # फ्रंटएंड डिपेंडेंसीज
+├── tailwind.config.js       # टेलविंड थीम्स और कलर्स कॉन्फ़िगरेशन
+└── vite.config.js           # विटे बंडलर सेटिंग्स

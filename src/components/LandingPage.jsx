@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// 🛠️ बिल्कुल सटीक सब-फ़ोल्डर पाथ्स
+// 🛠️ Sub-folder Component Imports
 import Hero from './landing/Hero.jsx';
 import ToolkitGrid from './landing/ToolkitGrid.jsx';
 import Features from './landing/Features.jsx';
@@ -16,7 +16,7 @@ export default function LandingPage({ setCurrentView, setIsSignupMode, setShowAu
   const [isDeleting, setIsDeleting] = useState(false);
   const [typingSpeed, setTypingSpeed] = useState(150);
 
-  // टाइपिंग एनीमेशन लॉजिक (फिक्स्ड setIsDeleting)
+  // Typing animation handler state logic
   useEffect(() => {
     let timer;
     const fullWord = ANIMATED_WORDS[textIndex];
@@ -46,7 +46,7 @@ export default function LandingPage({ setCurrentView, setIsSignupMode, setShowAu
 
   return (
     <div className="w-full flex flex-col overflow-y-auto">
-      {/* 🛠️ कॉम्पोनेंट्स को वही प्रॉप्स दे रहे हैं जो वो अंदर एक्सेप्ट कर रहे हैं */}
+      {/* Render subviews with corresponding parameters */}
       <Hero
         currentText={currentText}
         setIsSignupMode={setIsSignupMode}

@@ -5,9 +5,6 @@ import User from '../models/User.js';
 
 const router = express.Router();
 
-// 📲 टेम्परेरी ओटीपी कैशे मेमोरी (५ मिनट एक्सपायरी)
-const otpCache = new Map();
-
 // 1. SIGNUP ROUTE (http://localhost:5000/api/auth/signup)
 router.post('/signup', async (req, res) => {
     try {
@@ -66,75 +63,70 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// 📲 3. SEND OTP ROUTE (SMS & WhatsApp Code Gateway)
-router.post('/send-otp', async (req, res) => {
+
+// 🌐 5. GOOGLE OAUTH 2.0 VERIFICATION GATEWAY
+router.post('/google', async (req, res) => {
     try {
-        const { mobile, channel } = req.body; // channel: 'sms' या 'whatsapp'
+        const { token, mockEmail, mockName } = req.body;
 
-        if (!mobile || mobile.length !== 10) {
-            return res.status(400).json({ message: "Please enter a valid 10-digit mobile number." });
+        if (!token) {
+            return res.status(400).json({ message: "Verification token is required!" });
         }
 
-        // ६-डिजिट रैंडम ओटीपी जेनरेशन
-        const generatedOtp = "123456"; // असली गेटवे के लिए: Math.floor(100000 + Math.random() * 900000).toString();
+        let email = "";
+        let name = "";
 
-        // कैशे में स्टोर करें
-        otpCache.set(mobile, generatedOtp);
-        setTimeout(() => otpCache.delete(mobile), 5 * 60 * 1000);
+        // Sandbox check
+        if (token === "sandbox-token-bypass") {
+            email = mockEmail || "sandbox@pdfaiassistant.com";
+            name = mockName || "SANDBOX_USER";
+            console.log(`[GOOGLE BYPASS] Authenticated mock user: ${email}`);
+        } else {
+            // Verify token against Google's tokeninfo API
+            const tokenInfoUrl = `https://oauth2.googleapis.com/tokeninfo?id_token=${token}`;
+            const response = await fetch(tokenInfoUrl);
+            const payload = await response.json();
 
-        console.log(`[GATEWAY SUCCESS] OTP ${generatedOtp} sent via ${channel.toUpperCase()} to +91${mobile}`);
+            if (payload.error_description) {
+                console.error("🚨 Google Token Validation Error:", payload.error_description);
+                return res.status(400).json({ message: `Google Sign-in failed: ${payload.error_description}` });
+            }
 
-        return res.status(200).json({ success: true, message: "OTP routed securely to device." });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// 🔑 4. VERIFY OTP ROUTE (Auto OTP Matcher + User Auto-Creation)
-router.post('/verify-otp', async (req, res) => {
-    try {
-        const { mobile, otp } = req.body;
-
-        if (!mobile || !otp) {
-            return res.status(400).json({ message: "Missing required auth hashes." });
+            email = payload.email;
+            name = payload.name;
+            console.log(`[GOOGLE SUCCESS] Verified identity: ${email}`);
         }
 
-        const savedOtp = otpCache.get(mobile);
-
-        // ओटीपी मैचिंग (या सैंडबॉक्स बाईपास)
-        if (otp !== "123456" && (!savedOtp || savedOtp !== otp)) {
-            return res.status(400).json({ message: "Security token mismatch or expired." });
+        if (!email) {
+            return res.status(400).json({ message: "Unable to retrieve email from Google." });
         }
 
-        // मैच होने पर कैशे से डिलीट करें
-        otpCache.delete(mobile);
-
-        // चेक करें कि क्या यह मोबाइल नंबर डेटाबेस में पहले से है
-        let user = await User.findOne({ mobile });
+        // Find or create user
+        let user = await User.findOne({ email });
 
         if (!user) {
-            // अगर नया यूजर है, तो उसे ऑटो-क्रिएट (Sign up) करें
             user = new User({
-                mobile,
-                name: `User (+91 ${mobile.slice(5)})`
+                email,
+                name: name || email.split('@')[0]
             });
             await user.save();
         }
 
-        // JWT Session Token जनरेट करें
-        const token = jwt.sign(
+        // Issue JWT token
+        const sessionToken = jwt.sign(
             { userId: user._id },
             process.env.JWT_SECRET || 'SECRET_KEY_NODE',
             { expiresIn: '7d' }
         );
 
         return res.status(200).json({
-            token,
-            user: { id: user._id, name: user.name, mobile: user.mobile }
+            token: sessionToken,
+            user: { id: user._id, name: user.name, email: user.email }
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("🚨 Google Authentication Router Error:", error);
+        res.status(500).json({ error: "Failed to process Google sign-in." });
     }
 });
 

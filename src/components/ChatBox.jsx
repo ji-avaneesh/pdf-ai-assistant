@@ -1,7 +1,7 @@
 import React from 'react';
-import { Bot, User, ArrowUp, Cpu, Sparkles, MessageSquare } from 'lucide-react';
+import { Bot, User, ArrowUp, Cpu, Sparkles, MessageSquare, Menu } from 'lucide-react';
 
-export default function ChatBox({ selectedDocId, uploadHistory, chat, question, setQuestion, isTyping, handleSendMessage, chatEndRef }) {
+export default function ChatBox({ selectedDocId, uploadHistory, chat, question, setQuestion, isTyping, handleSendMessage, chatEndRef, sidebarOpen, setSidebarOpen }) {
 
   const activeDoc = uploadHistory.find(doc => (doc.id || doc._id) === selectedDocId);
 
@@ -11,12 +11,19 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
   };
 
   return (
-    /* 🛠️ फिक्स्ड: h-full और flex-col ताकि पूरा चैट बॉक्स हमेशा डिस्प्ले साइज पर लॉक रहे, कभी छोटा-बड़ा न हो */
+    /* Lock height and flex direction to ensure chat box occupies correct viewport bounds */
     <div className="flex-1 bg-[#0b1324] flex flex-col h-full relative font-sans overflow-hidden">
 
       {/* 🌐 Top Fixed Navbar Header */}
       <div className="bg-[#0b1324]/80 border-b border-slate-800/40 px-6 py-3.5 flex items-center justify-between shrink-0 select-none backdrop-blur z-20">
         <div className="flex items-center gap-2.5">
+          <button 
+            onClick={() => setSidebarOpen(true)}
+            className="md:hidden p-1.5 mr-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800/80 rounded-lg hover:border-indigo-500/30 transition-colors focus:outline-none"
+            aria-label="Open document vault"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
           <div className="text-xs font-mono font-extrabold text-slate-400 flex items-center gap-1.5">
             <MessageSquare className="w-4 h-4 text-indigo-400" />
             <span>Chat Thread Core</span>
@@ -24,7 +31,7 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
           {activeDoc && (
             <>
               <span className="text-slate-800">/</span>
-              <span className="text-xs font-bold text-slate-300 truncate max-w-[200px] sm:max-w-[400px]">
+              <span className="text-xs font-bold text-slate-300 truncate max-w-[150px] sm:max-w-[300px]">
                 {activeDoc.fileName}
               </span>
             </>
@@ -39,21 +46,21 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
         )}
       </div>
 
-      {/* 📜 2. Scrollable Message Container विथ कस्टम स्लाइडर (Scrollbar) */}
+      {/* 📜 2. Scrollable Message Container with custom scrollbar styling */}
       <div className="flex-1 overflow-y-auto bg-[#0b1324] pr-1 custom-scrollbar">
 
         {chat.length <= 1 && !activeDoc ? (
           /* 🔮 Empty State */
-          <div className="max-w-2xl mx-auto px-6 h-full min-h-[400px] flex flex-col justify-center items-center text-center gap-6 animate-fadeIn py-12 select-none">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 h-full min-h-[400px] flex flex-col justify-center items-center text-center gap-6 animate-fadeIn py-12 select-none">
             <div className="w-14 h-14 bg-slate-950 border border-slate-800/80 rounded-2xl flex items-center justify-center text-indigo-400 shadow-xl">
               <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">What can I analyze today?</h2>
-              <p className="text-xs text-slate-500 mt-1.5 max-w-sm mx-auto font-medium leading-relaxed">Select an active manuscript node from the Cloud Vault sidebar to begin vector chat strings.</p>
+              <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto font-medium leading-relaxed">Select an active manuscript node from the Cloud Vault sidebar to begin vector chat strings.</p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full max-w-xl mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mt-4">
               {[
                 "Summarize the entire core executive brief.",
                 "Extract all critical metrics & statistical data.",
@@ -63,34 +70,33 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
                 <div
                   key={idx}
                   onClick={() => handleSuggestionClick(text)}
-                  className="p-4 bg-slate-950/40 border border-slate-900/60 rounded-xl text-left text-xs font-medium text-slate-400 hover:text-slate-200 hover:border-slate-800 hover:bg-slate-900/40 transition-all cursor-pointer shadow-sm group"
+                  className="p-4 bg-slate-900/30 border border-slate-850 rounded-2xl text-left text-xs font-semibold text-slate-400 hover:text-slate-200 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98] group"
                 >
-                  <p className="line-clamp-2 leading-relaxed font-semibold">{text}</p>
+                  <p className="line-clamp-2 leading-relaxed">{text}</p>
                 </div>
               ))}
             </div>
           </div>
         ) : (
           /* 💬 Chat Stream Thread */
-          <div className="w-full max-w-3xl mx-auto px-6 py-8 space-y-6">
+          <div className="w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
             {chat.map((msg, index) => {
               const isAI = msg.role === 'ai';
               return (
                 <div
                   key={index}
-                  className={`flex gap-5 max-w-3xl animate-fadeIn ${isAI ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
+                  className={`flex gap-3 sm:gap-4 max-w-3xl animate-fadeIn ${isAI ? 'mr-auto' : 'ml-auto flex-row-reverse'}`}
                 >
-                  <div className={`w-8.5 h-8.5 rounded-xl border flex items-center justify-center shrink-0 shadow-md select-none
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center shrink-0 shadow-md select-none transition-colors
                     ${isAI ? 'bg-slate-950 border-slate-800 text-indigo-400' : 'bg-indigo-600 border-indigo-500 text-white'}`}
                   >
-                    {isAI ? <Bot className="w-4.5 h-4.5" /> : <User className="w-4.5 h-4.5" />}
+                    {isAI ? <Bot className="w-4 h-4 sm:w-5 sm:h-5" /> : <User className="w-4 h-4 sm:w-5 sm:h-5" />}
                   </div>
 
-                  {/* 🛠️ फिक्स्ड: यहाँ ब्रैकेट क्लोजर सिंटैक्स एरर को पूरी तरह ठीक कर दिया है */}
-                  <div className={`p-4 rounded-2xl text-sm leading-relaxed font-medium max-w-[85%] whitespace-pre-wrap
+                  <div className={`p-3.5 sm:p-4 rounded-2xl text-sm leading-relaxed font-medium max-w-[85%] whitespace-pre-wrap shadow-sm
                     ${isAI
-                      ? 'bg-transparent text-slate-200/90'
-                      : 'bg-slate-950 border border-slate-900 text-slate-100 rounded-tr-none shadow-sm'}`}
+                      ? 'bg-slate-950/20 border border-slate-900/40 text-slate-200/90 rounded-tl-none'
+                      : 'bg-slate-900/80 border border-slate-800/65 text-slate-100 rounded-tr-none'}`}
                   >
                     {msg.text}
                   </div>
@@ -100,11 +106,11 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
 
             {/* AI Thinking Bubble */}
             {isTyping && (
-              <div className="flex gap-5 mr-auto max-w-3xl animate-pulse">
-                <div className="w-8.5 h-8.5 rounded-xl border bg-slate-950 border-slate-800 text-indigo-400 flex items-center justify-center shrink-0 shadow-md">
-                  <Bot className="w-4.5 h-4.5" />
+              <div className="flex gap-3 sm:gap-4 mr-auto max-w-3xl animate-pulse">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border bg-slate-950 border-slate-800 text-indigo-400 flex items-center justify-center shrink-0 shadow-md">
+                  <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
-                <div className="p-4 text-slate-500 font-mono text-[11px] font-bold flex items-center gap-2 select-none">
+                <div className="p-4 text-slate-500 font-mono text-[10px] sm:text-[11px] font-bold flex items-center gap-2 select-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce"></span>
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.2s]"></span>
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.4s]"></span>
@@ -148,7 +154,7 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
         </div>
       </div>
 
-      {/* 🪄 बगल में सुंदर कस्टम थिन स्लाइडर / स्क्रोलबार इन्जेक्शन */}
+      {/* 🪄 Custom scrollbar stylesheet injection */}
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 5px;

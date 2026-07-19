@@ -3,14 +3,14 @@
   "name": "PDF AI Assistant Workspace",
   "icons": [
     {
-      "src": "favicon.svg",
+      "src": "fevicon.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "favicon.svg",
+      "src": "fevicon.png",
       "sizes": "192x192 512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

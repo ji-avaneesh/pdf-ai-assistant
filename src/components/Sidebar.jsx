@@ -1,7 +1,7 @@
 import React from 'react';
-import { Plus, FileText, ChevronRight, Sparkles } from 'lucide-react';
+import { Plus, FileText, ChevronRight, Sparkles, X } from 'lucide-react';
 
-export default function Sidebar({ isUploading, handleFileUpload, uploadHistory, selectedDocId, setSelectedDocId }) {
+export default function Sidebar({ isUploading, handleFileUpload, uploadHistory, selectedDocId, setSelectedDocId, sidebarOpen, setSidebarOpen }) {
 
   const formatSize = (size) => {
     if (!size) return "0 KB";
@@ -10,7 +10,29 @@ export default function Sidebar({ isUploading, handleFileUpload, uploadHistory, 
   };
 
   return (
-    <div className="w-68 bg-[#070b13] border-r border-slate-800/60 flex flex-col h-full font-sans select-none text-slate-200 shrink-0">
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <div className={`fixed inset-y-0 left-0 z-50 w-68 bg-[#070b13] border-r border-slate-800/60 flex flex-col h-full font-sans select-none text-slate-200 shrink-0 transition-transform duration-300 ease-in-out md:static md:translate-x-0
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      >
+        {/* Mobile Header Close Button */}
+        <div className="flex md:hidden items-center justify-between p-3.5 border-b border-slate-900 bg-[#0b1324]/20 shrink-0">
+          <span className="text-xs font-mono font-bold text-slate-400">PDF AI VAULT</span>
+          <button 
+            onClick={() => setSidebarOpen(false)}
+            className="p-1 text-slate-500 hover:text-white rounded transition-colors"
+            aria-label="Close sidebar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
       {/* ➕ New Document Button */}
       <div className="p-3.5 shrink-0">
@@ -91,5 +113,6 @@ export default function Sidebar({ isUploading, handleFileUpload, uploadHistory, 
       </div>
 
     </div>
+    </>
   );
 }
