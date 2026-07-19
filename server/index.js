@@ -1,33 +1,58 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import hpp from 'hpp';
+import morgan from 'morgan';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import documentRoutes from './routes/document.js';
+import { ApiLimiter } from './middleware/rateLimiter.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
 const app = express();
 
-// एक्सप्रेस v5+ के लिए सबसे स्टेबल CORS कॉन्फ़िगरेशन
+// Security & Optimization Middlewares (Phase 2)
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(compression());
+app.use(hpp());
+app.use(morgan('dev'));
+
+// Express CORS Configuration
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// General Rate Limiter
+app.use('/api/', ApiLimiter.general);
 
 // Routes Linking 
 app.use('/api/auth', authRoutes);
-app.use('/api/document', documentRoutes); // यह मुख्य रूट है, इसके अंदर अब /chat एक्टिव है
+app.use('/api/document', documentRoutes);
 
 app.get('/', (req, res) => {
-    res.send('🚀 PDF AI Assistant Backend Server is Running Perfectly with AI Nodes!');
+    res.json({ 
+      success: true, 
+      message: '🚀 PDF AI Assistant Backend Server is Active, Secure & Protected!',
+      version: '2.0.0-production'
+    });
 });
 
-const PORT = process.env.PORT || 5001; // Front-end 5001 पोर्ट पर रिक्वेस्ट भेज रहा है
-const MONGO_URI = process.env.MONGO_URI;
+// Centralized Error Handling Middleware (Phase 9)
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 5001;
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/pdf_ai_assistant";
 
 mongoose.connect(MONGO_URI)
     .then(() => {

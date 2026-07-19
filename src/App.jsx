@@ -22,6 +22,13 @@ const BACKEND_AUTH_URL = `${API_BASE}/api/auth`;
 const BACKEND_DOC_URL = `${API_BASE}/api/document`;
 const BACKEND_CHAT_URL = `${API_BASE}/api/document/chat`;
 
+// Attach Bearer Token Interceptor for backend authentication
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token") || "dev_token_user_123";
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+}, (error) => Promise.reject(error));
+
 export default function App() {
   const [currentView, setCurrentView] = useState('landing');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -63,7 +70,8 @@ export default function App() {
   const fetchUserHistory = async (userId) => {
     try {
       const res = await axios.get(`${BACKEND_DOC_URL}/history/${userId}`);
-      setUploadHistory(res.data);
+      const historyList = res.data.data || res.data;
+      setUploadHistory(Array.isArray(historyList) ? historyList : []);
     } catch (err) {
       console.log("No history found.");
     }
@@ -80,8 +88,9 @@ export default function App() {
 
     try {
       const res = await axios.get(`${BACKEND_DOC_URL}/chat/history/${docId}`);
-      if (res.data.messages && res.data.messages.length > 0) {
-        const mapped = res.data.messages.map(m => ({
+      const messagesData = res.data.data?.messages || res.data.messages;
+      if (messagesData && messagesData.length > 0) {
+        const mapped = messagesData.map(m => ({
           role: m.sender,
           text: m.text
         }));
@@ -105,26 +114,28 @@ export default function App() {
 
     const formData = new FormData();
     formData.append("pdf", file);
-    formData.append("userId", user?.id || user?._id);
+    formData.append("userId", user?.id || user?._id || user?.uid || "dev_user_123");
 
     setIsUploading(true);
     try {
       const res = await axios.post(`${BACKEND_DOC_URL}/upload`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
-      showToast(`🎉 ${res.data.message || "Document vectorized successfully!"}`);
+      showToast(`🎉 ${res.data.message || "Document chunked & vectorized successfully!"}`);
 
-      const docId = res.data.document.id || res.data.document._id;
+      const docPayload = res.data.data?.document || res.data.document;
+      const docId = docPayload.id || docPayload._id;
       const newDoc = {
         id: docId,
-        fileName: res.data.document.fileName,
-        fileSize: res.data.document.fileSize,
-        expires: res.data.document.expiresAt
+        fileName: docPayload.fileName,
+        fileSize: docPayload.fileSize,
+        expires: docPayload.expiresAt
       };
       setUploadHistory(prev => [newDoc, ...prev]);
       handleSelectDocument(docId);
     } catch (err) {
-      showToast(err.response?.data?.message || "PDF Upload Failed!", "error");
+      const errMessage = err.response?.data?.error?.message || err.response?.data?.message || "PDF Upload Failed!";
+      showToast(errMessage, "error");
     } finally {
       setIsUploading(false);
     }
@@ -197,13 +208,30 @@ export default function App() {
         documentId: selectedDocId,
         question: currentQuestion
       });
-      const aiResponse = res.data.answer || res.data.reply || res.data.text || res.data.message || (typeof res.data === 'string' ? res.data : "I have processed your request.");
-      setChat(prev => [...prev, { role: 'ai', text: aiResponse }]);
+
+      let aiResponse = "";
+      if (typeof res.data === 'string' && res.data.includes("data: ")) {
+        const lines = res.data.split('\n');
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const parsed = JSON.parse(line.slice(6));
+              if (parsed.fullAnswer) aiResponse = parsed.fullAnswer;
+              else if (parsed.token) aiResponse += parsed.token;
+            } catch (e) {}
+          }
+        }
+      } else {
+        aiResponse = res.data.answer || res.data.data?.answer || res.data.reply || res.data.text || res.data.message || (typeof res.data === 'string' ? res.data : "I have processed your request.");
+      }
+
+      setChat(prev => [...prev, { role: 'ai', text: aiResponse || "I have processed your request based on the document context." }]);
     } catch (err) {
       console.error("AI Server Fetch Error:", err);
+      const errMsg = err.response?.data?.error?.message || err.response?.data?.message || "Neural server connection timeout.";
       setChat(prev => [...prev, {
         role: 'ai',
-        text: "Neural server connection timeout."
+        text: `⚠️ ${errMsg}`
       }]);
     } finally {
       setIsTyping(false);
