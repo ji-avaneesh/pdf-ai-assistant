@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
 // 🛠️ Sub-folder Component Imports
-import Hero from './landing/Hero.jsx';
-import ToolkitGrid from './landing/ToolkitGrid.jsx';
-import Features from './landing/Features.jsx';
-import Pricing from './landing/Pricing.jsx';
-import Faq from './landing/Faq.jsx';
-import Footer from './landing/Footer.jsx';
+import Hero from './Landing/Hero.jsx';
+import ToolkitGrid from './Landing/ToolkitGrid.jsx';
+import Features from './Landing/Features.jsx';
+import Pricing from './Landing/Pricing.jsx';
+import Faq from './Landing/Faq.jsx';
+import Footer from './Landing/Footer.jsx';
 
 const ANIMATED_WORDS = ["with AI", "with Speed", "with Accuracy", "with Intelligence"];
 
