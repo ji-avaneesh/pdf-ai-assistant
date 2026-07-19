@@ -56,23 +56,29 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
               <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">What can I analyze today?</h2>
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                What can I analyze today?
+              </h2>
               <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto font-medium leading-relaxed">Select an active manuscript node from the Cloud Vault sidebar to begin vector chat strings.</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-xl mt-4">
               {[
-                "Summarize the entire core executive brief.",
-                "Extract all critical metrics & statistical data.",
-                "What are the primary technical bottlenecks mentioned?",
-                "Analyze the legal compliance or project constraints."
-              ].map((text, idx) => (
+                { text: "Summarize the entire core executive brief.", label: "Executive Summary", icon: "📋" },
+                { text: "Extract all critical metrics & statistical data.", label: "Data Extraction", icon: "📊" },
+                { text: "What are the primary technical bottlenecks mentioned?", label: "Technical Audit", icon: "⚙️" },
+                { text: "Analyze the legal compliance or project constraints.", label: "Compliance Check", icon: "🛡️" }
+              ].map((item, idx) => (
                 <div
                   key={idx}
-                  onClick={() => handleSuggestionClick(text)}
-                  className="p-4 bg-slate-900/30 border border-slate-850 rounded-2xl text-left text-xs font-semibold text-slate-400 hover:text-slate-200 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-300 cursor-pointer shadow-md active:scale-[0.98] group"
+                  onClick={() => handleSuggestionClick(item.text)}
+                  className="p-4 bg-gradient-to-br from-slate-900/40 to-[#070b13]/40 border border-slate-800/80 hover:border-indigo-500/40 rounded-2xl text-left transition-all duration-300 cursor-pointer shadow-lg hover:shadow-indigo-950/10 active:scale-[0.98] group flex flex-col justify-between h-[105px]"
                 >
-                  <p className="line-clamp-2 leading-relaxed">{text}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[8px] font-mono font-bold text-slate-500 uppercase tracking-widest group-hover:text-indigo-450 transition-colors">{item.label}</span>
+                    <span className="text-xs select-none">{item.icon}</span>
+                  </div>
+                  <p className="text-xs font-semibold text-slate-400 group-hover:text-slate-200 transition-colors line-clamp-2 leading-relaxed mt-2">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -127,7 +133,7 @@ export default function ChatBox({ selectedDocId, uploadHistory, chat, question, 
       {/* ⌨️ 3. Fixed Bottom Prompt Input Field Bar */}
       <div className="p-4 bg-gradient-to-t from-[#0b1324] via-[#0b1324] to-transparent shrink-0 z-10 mt-auto">
         <div className="max-w-3xl mx-auto relative">
-          <form onSubmit={handleSendMessage} className="bg-slate-950 border border-slate-800/80 focus-within:border-slate-700 rounded-2xl p-2 transition-all flex items-center shadow-2xl">
+          <form onSubmit={handleSendMessage} className="bg-slate-950 border border-slate-800/80 focus-within:border-indigo-500/60 focus-within:ring-2 focus-within:ring-indigo-500/10 rounded-2xl p-2 transition-all flex items-center shadow-2xl">
             <input
               type="text"
               value={question}
